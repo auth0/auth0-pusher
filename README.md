@@ -48,7 +48,7 @@ Pusher.PrivateChannel.prototype.authorize = function (socketId, callback) {
 
 The Pusher authentication token is computed in an Auth0 Rule for the app and returned in the `pusherAuth` property of the user profile.
 
-Notice that the `Login Widget` receives two extra parameters: `socket_id` and `channel`. These are used to compute the token following [Pusher documentation]().
+Notice that the `Login Widget` receives two extra parameters: `socket_id` and `channel`. These are used to compute the token following [Pusher documentation](http://pusher.com/docs/auth_signatures).
 
 Both are availabe in the `context.request.query` object in the rule:
 
