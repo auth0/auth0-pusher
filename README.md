@@ -1,4 +1,59 @@
-auth0-pusher
-============
+## A simple example using Pusher & Auth0
 
-A simple demo of Single Page Application with Auth0 &amp; Pusher
+This is a single page application (SPA) that will authenticate users using any of [Auth0 supported identity providers](https://docs.uth0.com/identityproviders) and then upon successful authentication will subscribe to a private events channel.
+
+### How it works?
+The sample uses the Pusher JS API to subscribe to a `private channel` and then binds to `new-message` events.
+
+```
+var pusher = new Pusher('3dc9278e1b763c7e1eeb', { authTransport: 'ajax'});
+var privateChannel = pusher.subscribe('private-channel-123');
+
+privateChannel.bind('pusher:subscription_error', function(status){
+    alert(status);
+});
+
+privateChannel.bind('new-message', function(data) {
+    alert(data);
+});
+```
+
+At the same time, we are overriding the `authorize` function of `PrivateChannel` so authentication happens through Auth0:
+
+```
+Pusher.PrivateChannel.prototype.authorize = function (socketId, callback) {
+    
+    widget.signin({ popup: true, extraParameters: { 
+        socket_id: socketId,
+        channel: 'private-channel-123'
+    },
+        access_type: 'offline'
+    }, null, function(err, profile, token) {
+        if (err) {
+            console.log("There was an error");
+            return alert("There was an error logging in");
+        } 
+        $('.login-box').hide();
+        $('.logged-in-box').show();
+        $('.avatar').attr('src', profile.picture);
+        $('.welcome').text('Welcome ' + profile.name);
+        $('.nickname').text(profile.nickname);
+        callback(false, {
+            auth: profile.pusherAuth
+        });
+    });
+
+};
+```
+
+The Pusher authentication token is computed in an Auth0 Rule for the app and returned in the `pusherAuth` property of the user profile.
+
+Notice that the `Login Widget` receives two extra parameters: `socket_id` and `channel`. These are used to compute the token following [Pusher documentation]().
+
+Both are availabe in the `context.request.query` object in the rule:
+
+```
+
+```
+
+> The sample is not considering any error conditions. 
