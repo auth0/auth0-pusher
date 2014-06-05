@@ -53,7 +53,27 @@ Notice that the `Login Widget` receives two extra parameters: `socket_id` and `c
 Both are availabe in the `context.request.query` object in the rule:
 
 ```
-
+function (user, context, callback) {
+  
+  var pusherKey='YOUR PUSHER KEY';
+  var pusherSecret = '{YOUR PUSHER SECRET}';
+  console.log(context.request.query.socket_id);
+  
+  if( context.request.query.channel && context.request.query.socket_id)
+  {
+    user.pusherAuth = pusherKey + ":" + sign(pusherSecret, context.request.query.channel, context.request.query.socket_id);
+  }
+  
+  callback(null, user, context);
+  
+  function sign(secret, channel, socket_id)
+  {
+    var string_to_sign = socket_id+":"+channel;
+    console.log(string_to_sign);
+    var sha = crypto.createHmac('sha256',secret);
+    return sha.update(string_to_sign).digest('hex');
+  }
+}
 ```
 
 > The sample is not considering any error conditions. 
